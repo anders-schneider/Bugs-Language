@@ -6,7 +6,7 @@ import java.util.Set;
 
 /**
  * Tokens specific to the Bugs language.
- * @author David Matuszek
+ * @author Anders Schneider
  * @version February 2015
  */
 public class Token {

@@ -4,7 +4,7 @@ package bugs;
  * Represents an error during recognition or parsing. All constructors
  * are as in RuntimeException.
  * 
- * @author David Matuszek
+ * @author Anders Schneider
  * @version February 2015
  */
 public class SyntaxException extends RuntimeException {

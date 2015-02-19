@@ -19,7 +19,7 @@ import java.io.StringReader;
  *       unrecoverable error has occurred and throw a
  *       <code>SyntaxException</code></li>.
  * </ul>
- * @author David Matuszek
+ * @author Anders Schneider
  * @version February 2015
  */
 public class Recognizer {
@@ -159,6 +159,181 @@ public class Recognizer {
     public boolean isVariable() {
         return name();
     }
+    
+    /**
+     * 
+     */
+    public boolean isAction() {
+    	
+    }
+    
+    /**
+     * 
+     */
+    public boolean isAllbugsCode() {
+    	
+    }
+    
+    /**
+     * 
+     */
+    public boolean isAssignmentStatement() {
+    	
+    }
+    
+    /**
+     * 
+     */
+    public boolean isBlock() {
+    	
+    }
+    
+    /**
+     * 
+     */
+    public boolean isBugDefinition() {
+    	
+    }
+    
+    /**
+     * 
+     */
+    public boolean isColorStatement() {
+    	
+    }
+    
+    /**
+     * 
+     */
+    public boolean isCommand() {
+    	
+    }
+    
+    /**
+     * 
+     */
+    public boolean isComparator() {
+    	
+    }
+    
+    /**
+     * 
+     */
+    public boolean isDoStatement() {
+    	
+    }
+    
+    /**
+     * 
+     */
+    public boolean isEol() {
+    	
+    }
+    
+    /**
+     * 
+     */
+    public boolean isExitIfStatement() {
+    	
+    }
+    
+    /**
+     * 
+     */
+    public boolean isFunctionCall() {
+    	
+    }
+    
+    /**
+     * 
+     */
+    public boolean isFunctionDefinition() {
+    	
+    }
+    
+    /**
+     * 
+     */
+    public boolean isInitializationBlock() {
+    	
+    }
+    
+    /**
+     * 
+     */
+    public boolean isLineAction() {
+    	
+    }
+    
+    /**
+     * 
+     */
+    public boolean isLoopStatement() {
+    	
+    }
+    
+    /**
+     * 
+     */
+    public boolean isMoveAction() {
+    	
+    }
+    
+    /**
+     * 
+     */
+    public boolean isMoveToAction() {
+    	
+    }
+    
+    /**
+     * 
+     */
+    public boolean isProgram() {
+    	
+    }
+    
+    /**
+     * 
+     */
+    public boolean isReturnStatement() {
+    	
+    }
+    
+    /**
+     * 
+     */
+    public boolean isStatement() {
+    	
+    }
+    
+    /**
+     * 
+     */
+    public boolean isSwitchStatement() {
+    	
+    }
+    
+    /**
+     * 
+     */
+    public boolean isTurnAction() {
+    	
+    }
+    
+    /**
+     * 
+     */
+    public boolean isTurnToAction() {
+    	
+    }
+    
+    /**
+     * 
+     */
+    public boolean isVarDeclaration() {
+    	
+    }
 
 //----- Private "helper" methods
 
@@ -168,7 +343,7 @@ public class Recognizer {
    *
    * @return <code>true</code> if the next token is a number.
    */
-      private boolean number() {
+    private boolean number() {
         return nextTokenMatches(Token.Type.NUMBER);
     }
 
