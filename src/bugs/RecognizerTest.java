@@ -173,127 +173,777 @@ public class RecognizerTest {
     
 	@Test
 	public void testIsAction() {
-		fail("Not yet implemented");
+		Recognizer r1 = new Recognizer("move foo + 2\n");
+		Recognizer r2 = new Recognizer("moveto 56, bar - 7\n");
+		Recognizer r3 = new Recognizer("turn bar\n");
+		Recognizer r4 = new Recognizer("turnto 56 / 23\n");
+		Recognizer r5 = new Recognizer("line 56, x + y, (77), something\n");
+		Recognizer r6 = new Recognizer("moveturn 57\n");
+		
+		assertTrue(r1.isAction());
+		assertTrue(r2.isAction());
+		assertTrue(r3.isAction());
+		assertTrue(r4.isAction());
+		assertTrue(r5.isAction());
+		assertFalse(r6.isAction());
 	}
 
 	@Test
 	public void testIsAllbugsCode() {
-		fail("Not yet implemented");
+		Recognizer r1 = new Recognizer("Allbugs { \n" +
+										"}\n");
+		
+		Recognizer r2 = new Recognizer("Allbugs { \n" +
+										"var foo, bar\n" +
+										"}\n");
+
+		Recognizer r3 = new Recognizer("Allbugs { \n" +
+										"var foo, bar\n" +
+										"var x, y\n\n" +
+										"}\n");
+
+		Recognizer r4 = new Recognizer("Allbugs { \n" +
+										"var foo, bar\n" +
+										"var x, y\n\n" +
+										"define fun1 using x {\n}\n" +
+										"}\n");
+
+		Recognizer r5 = new Recognizer("Allbugs { \n" +
+										"var foo, bar\n" +
+										"var x, y\n\n" +
+										"define fun1 using x {\n}\n" +
+										"define fun2 {\n}\n" +
+										"}\n");
+		
+		Recognizer r6 = new Recognizer("{ \n" +
+										"var foo, bar\n" +
+										"var x, y\n\n" +
+										"define fun1 using x {\n}\n" +
+										"define fun2 {\n}\n" +
+										"}\n");
+		
+		Recognizer r7 = new Recognizer("Allbugs { \n" +
+										"var foo, bar\n" +
+										"var x, y\n\n" +
+										"define fun1 using x {\n}\n" +
+										"define fun2 {\n}\n");
+														
+		assertTrue(r1.isAllbugsCode());
+		assertTrue(r2.isAllbugsCode());
+		assertTrue(r3.isAllbugsCode());
+		assertTrue(r4.isAllbugsCode());
+		assertTrue(r5.isAllbugsCode());
+		assertFalse(r6.isAllbugsCode());
+		
+		try{
+			assertTrue(r7.isAllbugsCode());
+		} catch (SyntaxException e) {}
 	}
 
 	@Test
 	public void testIsAssignmentStatement() {
-		fail("Not yet implemented");
+		Recognizer r1 = new Recognizer("x = 5\n");
+		Recognizer r2 = new Recognizer("5 = x\n");
+		Recognizer r3 = new Recognizer("= x + 10\n");
+		Recognizer r4 = new Recognizer("x + 9 = y\n");
+		Recognizer r5 = new Recognizer("x y + 7\n");
+		Recognizer r6 = new Recognizer("x =\n");
+		Recognizer r7 = new Recognizer("x = 5*y");
+		
+		assertTrue(r1.isAssignmentStatement());
+		assertFalse(r2.isAssignmentStatement());
+		assertFalse(r3.isAssignmentStatement());
+		
+		try{
+			assertTrue(r4.isAssignmentStatement());
+			fail();
+		} catch (SyntaxException e) {}
+		
+		try{
+			assertTrue(r5.isAssignmentStatement());
+			fail();
+		} catch (SyntaxException e) {}
+		
+		try{
+			assertTrue(r6.isAssignmentStatement());
+			fail();
+		} catch (SyntaxException e) {}
+		
+		try{
+			assertTrue(r7.isAssignmentStatement());
+			fail();
+		} catch (SyntaxException e) {}
 	}
 
 	@Test
 	public void testIsBlock() {
-		fail("Not yet implemented");
+		Recognizer r1 = new Recognizer("{\n\n }\n");
+		Recognizer r2 = new Recognizer("{ \n move foo\n} \n");
+		Recognizer r3 = new Recognizer("{ \n move foo\n do x\n } \n");
+		Recognizer r4 = new Recognizer("\n move foo\n}");
+		Recognizer r5 = new Recognizer("{ }\n");
+		Recognizer r6 = new Recognizer("{ \n foo + bar > foo\n \n");
+		
+		assertTrue(r1.isBlock());
+		assertTrue(r2.isBlock());
+		assertTrue(r3.isBlock());
+		assertFalse(r4.isBlock());
+				
+		try{
+			assertTrue(r5.isBlock());
+			fail();
+		} catch (SyntaxException e) {}
+		
+		try{
+			assertTrue(r6.isBlock());
+			fail();
+		} catch (SyntaxException e) {}
 	}
 
 	@Test
 	public void testIsBugDefinition() {
-		fail("Not yet implemented");
+		Recognizer r1 = new Recognizer("Bug bug1 { \n" + 
+										"move 66 + 7\n" + 
+										"}\n\n");
+		Recognizer r2 = new Recognizer("Bug bug1 { \n" +
+										"var foo, bar\n\n" +
+										"move 66 + 7\n" + 
+										"}\n\n");
+		
+		Recognizer r3 = new Recognizer("Bug bug1 { \n" +
+										"var foo, bar\n\n" +
+										"var x\n" +
+										"move 66 + 7\n" + 
+										"}\n\n");
+		
+		Recognizer r4 = new Recognizer("Bug bug1 { \n" +
+										"var foo, bar\n\n" +
+										"var x\n" +
+										"initially { \n move foo\n} \n" +
+										"move 66 + 7\n" + 
+										"}\n\n");
+		
+		Recognizer r5 = new Recognizer("Bug bug1 { \n" +
+										"var foo, bar\n\n" +
+										"var x\n" +
+										"initially { \n move foo\n} \n" +
+										"move 66 + 7\n" +
+										"turn x\n" +
+										"}\n\n");
+		
+		Recognizer r6 = new Recognizer("Bug bug1 { \n" +
+										"var foo, bar\n\n" +
+										"var x\n" +
+										"initially { \n move foo\n} \n" +
+										"move 66 + 7\n" +
+										"turn x\n" +
+										"define fun3 using x, y {\n}\n" +
+										"}\n\n");
+
+		Recognizer r7 = new Recognizer("Bug bug1 { \n" +
+										"var foo, bar\n\n" +
+										"var x\n" +
+										"initially { \n move foo\n} \n" +
+										"move 66 + 7\n" +
+										"turn x\n" +
+										"define fun3 using x, y {\n}\n" +
+										"define fun1 {\n}\n" +
+										"}\n\n");
+
+		Recognizer r8 = new Recognizer("Bug bug1 { \n" +
+										"var foo, bar\n\n" +
+										"var x\n" +
+										"initially { \n move foo\n} \n" +
+										"define fun3 using x, y {\n}\n" +
+										"define fun1 {\n}\n" +
+										"}\n\n");
+		
+		assertTrue(r1.isBugDefinition());
+		assertTrue(r2.isBugDefinition());
+		assertTrue(r3.isBugDefinition());
+		assertTrue(r4.isBugDefinition());
+		assertTrue(r5.isBugDefinition());
+		assertTrue(r6.isBugDefinition());
+		assertTrue(r7.isBugDefinition());
+		
+		try{
+			assertTrue(r8.isBugDefinition());
+			fail();
+		} catch (SyntaxException e) {}
 	}
 
 	@Test
 	public void testIsColorStatement() {
-		fail("Not yet implemented");
+		Recognizer r1 = new Recognizer("color loop \n");
+		Recognizer r2 = new Recognizer("brown do \n");
+		Recognizer r3 = new Recognizer("color \n");
+		Recognizer r4 = new Recognizer("color notakeyword \n");
+		Recognizer r5 = new Recognizer("color color \n \n \n");
+		
+		assertTrue(r1.isColorStatement());
+		assertFalse(r2.isColorStatement());
+		
+		try {
+			assertTrue(r3.isColorStatement());
+			fail();
+		} catch (SyntaxException e) {}
+		
+		try {
+			assertTrue(r4.isColorStatement());
+			fail();
+		} catch (SyntaxException e) {}
+				
+		assertTrue(r5.isColorStatement());
 	}
 
 	@Test
 	public void testIsCommand() {
-		fail("Not yet implemented");
+		Recognizer r1 = new Recognizer("move 66 + 7\n");
+		Recognizer r2 = new Recognizer("do foo(77, x)\n");
+		Recognizer r3 = new Recognizer("return 44 < 34\n");
+		Recognizer r4 = new Recognizer("line 55, 56, 7, 23\n");
+		Recognizer r5 = new Recognizer("55 < x\n");
+		Recognizer r6 = new Recognizer("23 + x\n");
+		
+		assertTrue(r1.isCommand());
+		assertTrue(r2.isCommand());
+		assertTrue(r3.isCommand());
+		assertTrue(r4.isCommand());
+		assertFalse(r5.isCommand());
+		assertFalse(r6.isCommand());
 	}
 
 	@Test
 	public void testIsComparator() {
-		fail("Not yet implemented");
+		Recognizer r = new Recognizer("< > foo = bar <= + >= != ! 9");
+		
+		assertTrue(r.isComparator());
+		assertTrue(r.isComparator());
+		assertTrue(r.isVariable());
+		assertTrue(r.isComparator());
+		assertTrue(r.isVariable());
+		assertTrue(r.isComparator());
+		assertFalse(r.isComparator());
+		assertTrue(r.isAddOperator());
+		assertTrue(r.isComparator());
+		assertTrue(r.isComparator());
+		
+		try {
+			assertTrue(r.isComparator());
+			fail();
+		}
+		catch (SyntaxException e) {
+		}
 	}
 
 	@Test
 	public void testIsDoStatement() {
-		fail("Not yet implemented");
+		Recognizer r1 = new Recognizer("do foo (9, x + 5) \n");
+		Recognizer r2 = new Recognizer("foo (9, x + 5) \n");
+		Recognizer r3 = new Recognizer("do (9, x + 5) \n");
+		Recognizer r4 = new Recognizer("do foo (9, x + 5)");
+		
+		Recognizer r5 = new Recognizer("do bar (27) \n");
+		Recognizer r6 = new Recognizer("do bar \n");
+		Recognizer r7 = new Recognizer("do bar (27) (a) (99, b) \n");
+		
+		assertTrue(r1.isDoStatement());
+		assertFalse(r2.isDoStatement());
+		
+		try{
+			assertTrue(r3.isDoStatement());
+			fail();
+		} catch (SyntaxException e) {}
+		
+		try{
+			assertTrue(r4.isDoStatement());
+			fail();
+		} catch (SyntaxException e) {}
+		
+		assertTrue(r5.isDoStatement());
+		assertTrue(r6.isDoStatement());
+		
+		try{
+			assertFalse(r7.isDoStatement());
+			fail();
+		} catch (SyntaxException e) {}
 	}
 
 	@Test
 	public void testIsEol() {
-		fail("Not yet implemented");
+		Recognizer r1 = new Recognizer("\n");
+		Recognizer r2 = new Recognizer("var \n");
+		Recognizer r3 = new Recognizer("");
+		
+		assertTrue(r1.isEol());
+		
+		assertFalse(r2.isEol());
+		r2.nextToken();
+		assertTrue(r2.isEol());
+		
+		assertFalse(r3.isEol());
 	}
 
 	@Test
 	public void testIsExitIfStatement() {
-		fail("Not yet implemented");
+		Recognizer r1 = new Recognizer("exit if x > 2\n");
+		Recognizer r2 = new Recognizer("exit if 1 = 17\n");
+		Recognizer r3 = new Recognizer("exit if 2 + 9\n\n");
+		Recognizer r4 = new Recognizer("if 2 < 4\n");
+		Recognizer r5 = new Recognizer("exit x + 2\n");
+		Recognizer r6 = new Recognizer("exit if\n");
+		Recognizer r7 = new Recognizer("exit if x > 1");
+		
+		assertTrue(r1.isExitIfStatement());
+		assertTrue(r2.isExitIfStatement());
+		assertTrue(r3.isExitIfStatement());
+		assertFalse(r4.isExitIfStatement());
+		
+		try{
+			assertTrue(r5.isExitIfStatement());
+			fail();
+		} catch (SyntaxException e) {}
+		
+		try{
+			assertTrue(r6.isExitIfStatement());
+			fail();
+		} catch (SyntaxException e) {}
+		
+		try{
+			assertTrue(r7.isExitIfStatement());
+			fail();
+		} catch (SyntaxException e) {}
+	}
+	
+	@Test
+	public void testIsExpression() {
+		Recognizer r1 = new Recognizer("5 + 7 < 13");
+		Recognizer r2 = new Recognizer("-bar = foo + 2");
+		Recognizer r3 = new Recognizer("bar + 2 <= foo / 2");
+		Recognizer r4 = new Recognizer("bar = foo = x = 8 <= 10");
+		Recognizer r5 = new Recognizer("bar + 2");
+		Recognizer r6 = new Recognizer("(5, 7)");
+		Recognizer r7 = new Recognizer("fun = fun +");
+		
+		assertTrue(r1.isExpression());
+		assertTrue(r2.isExpression());
+		assertTrue(r3.isExpression());
+		assertTrue(r4.isExpression());
+		assertTrue(r5.isExpression());
+		
+		try{
+			assertTrue(r6.isExpression());
+			fail();
+		} catch (SyntaxException e) {}
+		
+		try{
+			assertTrue(r7.isExpression());
+			fail();
+		} catch (SyntaxException e) {}
 	}
 
 	@Test
 	public void testIsFunctionCall() {
-		fail("Not yet implemented");
+		Recognizer r1 = new Recognizer("foo(22)");
+		Recognizer r2 = new Recognizer("bar(bar)");
+		Recognizer r3 = new Recognizer("fun(9 / x)");
+		Recognizer r4 = new Recognizer("(9)");
+		Recognizer r5 = new Recognizer("bar x");
+		
+		assertTrue(r1.isFunctionCall());
+		assertTrue(r2.isFunctionCall());
+		assertTrue(r3.isFunctionCall());
+		assertFalse(r4.isFunctionCall());
+		
+		try {
+			assertTrue(r5.isFunctionCall());
+			fail();
+		} catch (SyntaxException e) {}
 	}
 
 	@Test
 	public void testIsFunctionDefinition() {
-		fail("Not yet implemented");
+		Recognizer r1 = new Recognizer("define fun1 {\n}\n");
+		Recognizer r2 = new Recognizer("define fun2 using x {\n}\n");
+		Recognizer r3 = new Recognizer("define fun3 using x, y {\n}\n");
+		Recognizer r4 = new Recognizer("fun4 {\n}\n");
+		Recognizer r5 = new Recognizer("define fun5 x, y {\n}\n");
+		Recognizer r6 = new Recognizer("define fun6 using {\n}\n");
+		Recognizer r7 = new Recognizer("define fun7 using x, y");
+		
+		assertTrue(r1.isFunctionDefinition());
+		assertTrue(r2.isFunctionDefinition());
+		assertTrue(r3.isFunctionDefinition());
+		assertFalse(r4.isFunctionDefinition());
+		
+		try {
+			assertTrue(r5.isFunctionDefinition());
+			fail();
+		} catch (SyntaxException e) {}
+		
+		try {
+			assertTrue(r6.isFunctionDefinition());
+			fail();
+		} catch (SyntaxException e) {}
+		
+		try {
+			assertTrue(r7.isFunctionDefinition());
+			fail();
+		} catch (SyntaxException e) {}
 	}
 
 	@Test
 	public void testIsInitializationBlock() {
-		fail("Not yet implemented");
+		Recognizer r1 = new Recognizer("initially {\n\n }\n");
+		Recognizer r2 = new Recognizer("initially { \n move foo\n} \n");
+		Recognizer r3 = new Recognizer("{ \n move foo\n do x\n } \n");
+		Recognizer r5 = new Recognizer("initially { }\n");
+		Recognizer r6 = new Recognizer("initially { \n foo + bar > foo\n \n");
+		
+		assertTrue(r1.isInitializationBlock());
+		assertTrue(r2.isInitializationBlock());
+		assertFalse(r3.isInitializationBlock());
+				
+		try{
+			assertTrue(r5.isInitializationBlock());
+			fail();
+		} catch (SyntaxException e) {}
+		
+		try{
+			assertTrue(r6.isInitializationBlock());
+			fail();
+		} catch (SyntaxException e) {}
 	}
 
 	@Test
 	public void testIsLineAction() {
-		fail("Not yet implemented");
+		Recognizer r1 = new Recognizer("line 45, x + 9, (90), foo\n");
+		Recognizer r2 = new Recognizer("line foo, foo, foo, foo\n\n");
+		Recognizer r3 = new Recognizer("foo, foo, foo, foo\n\n");
+		Recognizer r4 = new Recognizer("line , bar, bar, bar\n");
+		Recognizer r5 = new Recognizer("line foo + 0, foo + 1, foo + 2\n");
+		Recognizer r6 = new Recognizer("line 45, x + 9, (90), foo");
+		
+		assertTrue(r1.isLineAction());
+		assertTrue(r2.isLineAction());
+		assertFalse(r3.isLineAction());
+		
+		try{
+			assertTrue(r4.isLineAction());
+			fail();
+		} catch (SyntaxException e) {}
+		
+		try{
+			assertTrue(r5.isLineAction());
+			fail();
+		} catch (SyntaxException e) {}
+		
+		try{
+			assertTrue(r6.isLineAction());
+			fail();
+		} catch (SyntaxException e) {}
 	}
 
 	@Test
 	public void testIsLoopStatement() {
-		fail("Not yet implemented");
+		Recognizer r1 = new Recognizer("loop {\n\n }\n");
+		Recognizer r2 = new Recognizer("loop { \n move foo\n} \n");
+		Recognizer r3 = new Recognizer("{ \n move foo\n do x\n } \n");
+		Recognizer r5 = new Recognizer("loop { }\n");
+		Recognizer r6 = new Recognizer("loop { \n foo + bar > foo\n \n");
+		
+		assertTrue(r1.isLoopStatement());
+		assertTrue(r2.isLoopStatement());
+		assertFalse(r3.isLoopStatement());
+				
+		try{
+			assertTrue(r5.isLoopStatement());
+			fail();
+		} catch (SyntaxException e) {}
+		
+		try{
+			assertTrue(r6.isLoopStatement());
+			fail();
+		} catch (SyntaxException e) {}
 	}
 
 	@Test
 	public void testIsMoveAction() {
-		fail("Not yet implemented");
+		Recognizer r1 = new Recognizer("move 45\n");
+		Recognizer r2 = new Recognizer("move foo\n\n");
+		Recognizer r3 = new Recognizer("foo\n\n");
+		Recognizer r4 = new Recognizer("move \n");
+		Recognizer r5 = new Recognizer("move foo + 0, foo + 1\n");
+		Recognizer r6 = new Recognizer("move 45");
+		
+		assertTrue(r1.isMoveAction());
+		assertTrue(r2.isMoveAction());
+		assertFalse(r3.isMoveAction());
+		
+		try{
+			assertTrue(r4.isMoveAction());
+			fail();
+		} catch (SyntaxException e) {}
+		
+		try{
+			assertTrue(r5.isMoveAction());
+			fail();
+		} catch (SyntaxException e) {}
+		
+		try{
+			assertTrue(r6.isMoveAction());
+			fail();
+		} catch (SyntaxException e) {}
 	}
 
 	@Test
 	public void testIsMoveToAction() {
-		fail("Not yet implemented");
+		Recognizer r1 = new Recognizer("moveto 45, x + 9\n");
+		Recognizer r2 = new Recognizer("moveto foo, foo\n\n");
+		Recognizer r3 = new Recognizer("foo, foo, foo, foo\n\n");
+		Recognizer r4 = new Recognizer("moveto , bar\n");
+		Recognizer r5 = new Recognizer("moveto foo + 0\n");
+		Recognizer r6 = new Recognizer("moveto 45, x + 9");
+		
+		assertTrue(r1.isMoveToAction());
+		assertTrue(r2.isMoveToAction());
+		assertFalse(r3.isMoveToAction());
+		
+		try{
+			assertTrue(r4.isMoveToAction());
+			fail();
+		} catch (SyntaxException e) {}
+		
+		try{
+			assertTrue(r5.isMoveToAction());
+			fail();
+		} catch (SyntaxException e) {}
+		
+		try{
+			assertTrue(r6.isMoveToAction());
+			fail();
+		} catch (SyntaxException e) {}
 	}
 
 	@Test
 	public void testIsProgram() {
-		fail("Not yet implemented");
+		Recognizer r1 = new Recognizer("Bug bug1 { \n" + 
+										"move 66 + 7\n" + 
+										"}\n\n");
+
+		Recognizer r2 = new Recognizer("Allbugs { \n" + 
+										"var foo, bar\n" +
+										"}\n" +
+										"Bug bug1 { \n" + 
+										"move 66 + 7\n" + 
+										"}\n\n");
+
+		Recognizer r3 = new Recognizer("Allbugs { \n" + 
+										"var foo, bar\n" +
+										"}\n" +
+										"Bug bug1 { \n" + 
+										"move 66 + 7\n" + 
+										"}\n\n" +
+										"Bug bug1 { \n" + 
+										"move 66 + 7\n" + 
+										"}\n\n");
+
+		Recognizer r4 = new Recognizer("Allbugs { \n" + 
+										"var foo, bar\n" +
+										"}\n" +
+										"Bug bug1 { \n" + 
+										"move 66 + 7\n" + 
+										"}\n\n" +
+										"Bug bug1 { \n" + 
+										"move 66 + 7\n" + 
+										"}\n\n" +
+										"Bug bug1 { \n" + 
+										"move 66 + 7\n" + 
+										"}\n\n");
+
+		Recognizer r5 = new Recognizer("Allbugs { \n" + 
+										"var foo, bar\n" +
+										"}\n");
+
+		assertTrue(r1.isProgram());
+		assertTrue(r2.isProgram());
+		assertTrue(r3.isProgram());
+		assertTrue(r4.isProgram());
+		
+		try{
+			assertTrue(r5.isProgram());
+		} catch (SyntaxException e) {}
 	}
 
 	@Test
 	public void testIsReturnStatement() {
-		fail("Not yet implemented");
+		Recognizer r1 = new Recognizer("return x > 2\n");
+		Recognizer r2 = new Recognizer("return 1 = 17\n");
+		Recognizer r3 = new Recognizer("return 2 + 9\n\n");
+		Recognizer r4 = new Recognizer("2 < 4\n");
+		Recognizer r6 = new Recognizer("return\n");
+		Recognizer r7 = new Recognizer("return x > 1");
+		
+		assertTrue(r1.isReturnStatement());
+		assertTrue(r2.isReturnStatement());
+		assertTrue(r3.isReturnStatement());
+		assertFalse(r4.isReturnStatement());
+		
+		try{
+			assertTrue(r6.isReturnStatement());
+			fail();
+		} catch (SyntaxException e) {}
+		
+		try{
+			assertTrue(r7.isReturnStatement());
+			fail();
+		} catch (SyntaxException e) {}
 	}
 
 	@Test
 	public void testIsStatement() {
-		fail("Not yet implemented");
+		Recognizer r1 = new Recognizer("loop {\n\n }\n");
+		Recognizer r2 = new Recognizer("return x > 2\n");
+		Recognizer r3 = new Recognizer("x = 5\n");
+		Recognizer r4 = new Recognizer("exit if x > 2\n");
+		Recognizer r5 = new Recognizer("switch {\n case x = 5\n move 66 + 7\n turn x\n }\n");		
+		Recognizer r6 = new Recognizer("do foo (9, x + 5) \n");
+		Recognizer r7 = new Recognizer("color loop \n");
+		
+		assertTrue(r1.isStatement());
+		assertTrue(r2.isStatement());
+		assertTrue(r3.isStatement());
+		assertTrue(r4.isStatement());
+		assertTrue(r5.isStatement());
+		assertTrue(r6.isStatement());
+		assertTrue(r7.isStatement());
+		
+		Recognizer r8 = new Recognizer("moveto 45, x + 9");
+		Recognizer r9 = new Recognizer("turnto foo\n\n");
+		
+		assertFalse(r8.isStatement());
+		assertFalse(r9.isStatement());
+		
+		Recognizer r10 = new Recognizer("switch {\n case x = 5\n move 66 + 7\n turn x }\n");
+		
+		try{
+			assertTrue(r10.isStatement());
+			fail();
+		} catch (SyntaxException e) {}
 	}
 
 	@Test
 	public void testIsSwitchStatement() {
-		fail("Not yet implemented");
+		Recognizer r1 = new Recognizer("switch {\n}\n");
+		Recognizer r2 = new Recognizer("switch {\n case x = 5\n }\n");
+		Recognizer r3 = new Recognizer("switch {\n case x = 5\n move 66 + 7\n }\n");
+		Recognizer r4 = new Recognizer("switch {\n case x = 5\n case x = 6\n }\n");
+		Recognizer r5 = new Recognizer("switch {\n case x = 5\n move 66 + 7\n case x = 6\n turn x\n }\n");
+		Recognizer r6 = new Recognizer("switch {\n case x = 5\n move 66 + 7\n turn x\n }\n");
+		Recognizer r7 = new Recognizer("{\n}\n");
+		Recognizer r8 = new Recognizer("switch {\n case x = 5\n move 66 + 7\n turn x }\n");
+		
+		assertTrue(r1.isSwitchStatement());
+		assertTrue(r2.isSwitchStatement());
+		assertTrue(r3.isSwitchStatement());
+		assertTrue(r4.isSwitchStatement());
+		assertTrue(r5.isSwitchStatement());
+		assertTrue(r6.isSwitchStatement());
+		assertFalse(r7.isSwitchStatement());
+		
+		try{
+			assertTrue(r8.isSwitchStatement());
+			fail();
+		} catch (SyntaxException e) {}
 	}
 
 	@Test
 	public void testIsTurnAction() {
-		fail("Not yet implemented");
+		Recognizer r1 = new Recognizer("turn 45\n");
+		Recognizer r2 = new Recognizer("turn foo\n\n");
+		Recognizer r3 = new Recognizer("foo\n\n");
+		Recognizer r4 = new Recognizer("turn \n");
+		Recognizer r5 = new Recognizer("turn foo + 0, foo + 1\n");
+		Recognizer r6 = new Recognizer("turn 45");
+		
+		assertTrue(r1.isTurnAction());
+		assertTrue(r2.isTurnAction());
+		assertFalse(r3.isTurnAction());
+		
+		try{
+			assertTrue(r4.isTurnAction());
+			fail();
+		} catch (SyntaxException e) {}
+		
+		try{
+			assertTrue(r5.isTurnAction());
+			fail();
+		} catch (SyntaxException e) {}
+		
+		try{
+			assertTrue(r6.isTurnAction());
+			fail();
+		} catch (SyntaxException e) {}
 	}
 
 	@Test
 	public void testIsTurnToAction() {
-		fail("Not yet implemented");
+		Recognizer r1 = new Recognizer("turnto 45\n");
+		Recognizer r2 = new Recognizer("turnto foo\n\n");
+		Recognizer r3 = new Recognizer("foo\n\n");
+		Recognizer r31 = new Recognizer("turn 56\n");
+		Recognizer r4 = new Recognizer("turnto \n");
+		Recognizer r5 = new Recognizer("turnto foo + 0, foo + 1\n");
+		Recognizer r6 = new Recognizer("turnto 45");
+		
+		assertTrue(r1.isTurnToAction());
+		assertTrue(r2.isTurnToAction());
+		assertFalse(r3.isTurnToAction());
+		assertFalse(r31.isTurnToAction());
+		
+		try{
+			assertTrue(r4.isTurnToAction());
+			fail();
+		} catch (SyntaxException e) {}
+		
+		try{
+			assertTrue(r5.isTurnToAction());
+			fail();
+		} catch (SyntaxException e) {}
+		
+		try{
+			assertTrue(r6.isTurnToAction());
+			fail();
+		} catch (SyntaxException e) {}
 	}
 
 	@Test
 	public void testIsVarDeclaration() {
-		fail("Not yet implemented");
+		Recognizer r1 = new Recognizer("var foo\n");
+		Recognizer r2 = new Recognizer("var foo, bar\n\n");
+		Recognizer r3 = new Recognizer("foo\n\n");
+		Recognizer r4 = new Recognizer("var \n");
+		Recognizer r5 = new Recognizer("var foo, foo + 1\n");
+		Recognizer r6 = new Recognizer("var foo");
+		
+		assertTrue(r1.isVarDeclaration());
+		assertTrue(r2.isVarDeclaration());
+		assertFalse(r3.isVarDeclaration());
+		
+		try{
+			assertTrue(r4.isVarDeclaration());
+			fail();
+		} catch (SyntaxException e) {}
+		
+		try{
+			assertTrue(r5.isVarDeclaration());
+			fail();
+		} catch (SyntaxException e) {}
+		
+		try{
+			assertTrue(r6.isVarDeclaration());
+			fail();
+		} catch (SyntaxException e) {}
 	}
 
     @Test
