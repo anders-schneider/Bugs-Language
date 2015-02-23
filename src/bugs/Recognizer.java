@@ -572,7 +572,18 @@ public class Recognizer {
     }
     
     /**
-     * 
+     * Tries to recognize a &lt;switch statement&gt;.
+     * <pre>&lt;switch statement&gt; ::= "switch" "{" &lt;eol&gt;
+     * 		       { "case" &lt;expression&gt; &lt;eol&gt;
+     * 		           { &lt;command&gt; } }
+     * 		  "}" &lt;eol&gt;</pre>
+     * A <code>SyntaxException</code> will be thrown if the "switch" is not followed
+     * by a "{", or if there is no eol
+     * after the first "{", or if there is no valid expression after "case", or
+     * if there is no valid eol following the expression,
+     * or if the final "}" is not present, or if there is an error with the
+     * final eol of the statement.
+     * @return <code>true</code> if a switch statement is recognized.
      */
     public boolean isSwitchStatement() {
     	if (!keyword("switch")) {return false;}
@@ -581,7 +592,7 @@ public class Recognizer {
     	
     	while (keyword("case")) {
     		if (!isExpression()) {error("Invalid expression following 'case'");}
-    		if (!isEol()) {error("No vali eol following expression");}
+    		if (!isEol()) {error("No valid eol following expression");}
     		while (isCommand()) {}
     	}
     	
