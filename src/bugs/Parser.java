@@ -774,7 +774,7 @@ public class Parser {
     	while (keyword("case")) {
     		if (!isExpression()) {error("Invalid expression following 'case'");}
     		makeTree(2, 1);
-    		if (!isEol()) {error("No valid eol following expression");}
+    		if (!isEol()) {error("No valid eol following expression");}    		
     		while (isCommand()) {
     			makeTree(2, 1);
     		}

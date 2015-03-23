@@ -11,7 +11,8 @@ import org.junit.runners.Suite.SuiteClasses;
                       TreeParserTest.class,
                       RecognizerTest1.class,
                       RecognizerTest2.class,
-                      RecognizerTest3.class})
+                      RecognizerTest3.class,
+                      BugTest.class})
 public class AllTests {
     // Empty class
 }

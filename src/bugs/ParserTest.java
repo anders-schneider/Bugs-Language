@@ -768,6 +768,23 @@ public class ParserTest {
 		expected = tree("switch", tree("case", tree("=", "x", "5.0"), tree("move", tree("+", "66.0", "7.0")), tree("turn", "x")));
 		assertStackTopEquals(expected);
 		
+		use("switch {\n"
+				+ "case x = 0\n"
+					+ "x = 1\n"
+			+ "}\n");
+		assertTrue(parser.isSwitchStatement());
+		expected = tree("switch", tree("case", tree("=", "x", "0.0"), tree("assign", "x", "1.0")));
+		assertStackTopEquals(expected);
+		
+		use("switch {\n"
+				+ "case x = 10\n"
+					+ "x = 0\n"
+					+ "y = 0\n"
+			+ "}\n");
+		assertTrue(parser.isSwitchStatement());
+		expected = tree("switch", tree("case", tree("=", "x", "10.0"), tree("assign", "x", "0.0"), tree("assign", "y", "0.0")));
+		assertStackTopEquals(expected);
+		
 		use("{\n}\n");
 		assertFalse(parser.isSwitchStatement());
 		
@@ -1325,7 +1342,7 @@ public class ParserTest {
      * but there may be additional (untested) Tokens to be returned.
      * This method is primarily to test whether Tokens are pushed
      * back appropriately.
-     * @param parser TODO
+     * @param parser
      * @param expectedTokens The Tokens we expect to get from the Tokenizer.
      */
     private void followedBy(Parser parser, String expectedTokens) {
