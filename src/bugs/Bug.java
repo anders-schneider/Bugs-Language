@@ -15,8 +15,7 @@ public class Bug {
 	private int numLoops;
 	
     /**
-     * Constructs a Bug and positions it at the origin (0, 0), facing due east, and
-     * gives the bug the default color of white.
+     * Constructs a Bug and positions it at the origin (0, 0), facing due east.
      */
 	public Bug() {
 		variables = new HashMap<String, Double>();
@@ -25,9 +24,6 @@ public class Bug {
 		y = 0;
 		angle = 0;
 		numLoops = 0;
-		
-		// Default color: white
-		bugColor = Color.white;
 	}
 	
 	/**
@@ -522,7 +518,7 @@ public class Bug {
 			bugColor = new Color(128, 0, 128);
 			return;
 		case "none":
-			bugColor = Color.white;
+			bugColor = null;
 			return;
 		}
 		

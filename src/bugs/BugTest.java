@@ -480,7 +480,7 @@ public class BugTest {
 		Tree<Token> tree;
 		Bug b = new Bug();
 		
-		assertEquals(b.bugColor, Color.white);
+		assertNull(b.bugColor);
 		tree = useCommand("color blue\n");
 		b.interpret(tree);
 		assertEquals(b.bugColor, Color.blue);
