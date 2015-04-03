@@ -12,7 +12,8 @@ public class BugTest {
 
 	@Test
 	public void testStoreAndFetch() {
-		Bug bug = new Bug();
+		Interpreter i = new Interpreter();
+		Bug bug = new Bug(i);
 		
 		bug.store("x", 1.0);
 		assertEquals(bug.fetch("x"), 1.0, 0);
@@ -21,6 +22,9 @@ public class BugTest {
 			bug.fetch("u");
 			fail();
 		} catch (IllegalArgumentException e) { }
+		
+		Tree<Token> tree = useVarDeclaration("var u\n");
+		bug.interpret(tree);
 		
 		bug.store("u", 0);
 		assertEquals(bug.fetch("u"), 0, 0);
@@ -34,7 +38,8 @@ public class BugTest {
 	@Test
 	public void testEvaluateArithmetic() {
 		Tree<Token> tree;
-		Bug b = new Bug();
+		Interpreter i = new Interpreter();
+		Bug b = new Bug(i);
 		
 		tree = useExpression("3");
 		assertEquals(3, b.evaluate(tree), 0);
@@ -58,7 +63,8 @@ public class BugTest {
 	@Test
 	public void testEvaluateComparisons() {
 		Tree<Token> tree;
-		Bug b = new Bug();
+		Interpreter i = new Interpreter();
+		Bug b = new Bug(i);
 		
 		tree = useExpression("5 > 3");
 		assertEquals(1, b.evaluate(tree), 0);
@@ -90,25 +96,199 @@ public class BugTest {
 		tree = useExpression("8 <= 0");
 		assertEquals(0, b.evaluate(tree), 0);
 	}
+
+	@Test
+	public void testEvaluateDotNotation() {
+		Tree<Token> tree;
+		Interpreter i = new Interpreter();
+		Bug b1 = new Bug(i);
+		Bug b2 = new Bug(i);
+		
+		b1.bugName = "Alice";
+		b2.bugName = "Bob";
+		i.bugs.put(b1.bugName, b1);
+		i.bugs.put(b2.bugName, b2);
+		
+		tree = useExpression("Alice.x");
+		assertEquals(0,  b2.evaluate(tree), 0);
+		
+		b1.store("x", 17);
+		assertEquals(17, b2.evaluate(tree), 0);
+		
+		tree = useExpression("Carlos.y");
+		try {
+			b1.evaluate(tree);
+			fail();
+		} catch (IllegalArgumentException e) {}
+		
+		Bug b3 = new Bug(i);
+		b3.bugName = "Fred";
+		i.bugs.put(b3.bugName, b3);
+		tree = useBugDefinition("Bug Fred {\n"
+										+ "var foo\n"
+										+ "initially {\n"
+													+ "x = 50\n"
+													+ "y = 50\n"
+													+ "foo = 30\n"
+										+ "}\n"
+										+ "x = 2\n"
+										+ "define func1 using z {\n"
+																+ "return 2 * z\n"
+															+ "}\n"
+								+ "}\n");
+		b3.interpret(tree);
+		
+		tree = useExpression("Fred.foo");
+		assertEquals(30, b2.evaluate(tree), 0);
+		
+		tree = useExpression("Fred.z");
+		try {
+			b2.evaluate(tree);
+			fail();
+		} catch (IllegalArgumentException e) { }
+	}
+
+
+	@Test
+	public void testInterpretFunction() {
+		Tree<Token> tree;
+		Interpreter i = new Interpreter();
+		Bug b = new Bug(i);
+		
+		assertEquals(1, b.scopes.size());
+		assertEquals(0, b.fetch("x"), 0);
+		tree = useFunction("define func1 {\n"
+										+ "x = 2\n"
+										+ "}\n");
+		b.interpret(tree);
+		tree = useFunctionCall("func1()");
+		b.evaluate(tree);
+		assertEquals(2, b.fetch("x"), 0);
+		assertEquals(1, b.scopes.size());
+		
+		tree = useFunction("define func2 using foo {\n"
+													+ "x = foo + 2\n"
+												+ "}\n");
+		b.interpret(tree);
+		tree = useFunctionCall("func2(7)");
+		b.evaluate(tree);
+		assertEquals(9, b.fetch("x"), 0);
+		assertEquals(1, b.scopes.size());
+		
+		tree = useFunctionCall("func2(10)");
+		b.evaluate(tree);
+		assertEquals(12, b.fetch("x"), 0);
+		assertEquals(1, b.scopes.size());
+		
+		tree = useFunctionCall("func2()");
+		try{
+			b.evaluate(tree);
+			fail();
+		} catch (RuntimeException e) { }
+		assertEquals(1, b.scopes.size());
+		
+		tree = useFunctionCall("func2(2, 3)");
+		try{
+			b.evaluate(tree);
+			fail();
+		} catch (RuntimeException e) { }
+		assertEquals(1, b.scopes.size());
+		
+		tree = useFunctionCall("func7(2)");
+		try {
+			b.evaluate(tree);
+			fail();
+		} catch (IllegalArgumentException e) { }
+		assertEquals(1, b.scopes.size());
+		
+		tree = useFunction("define func3 using u {\n"
+												+ "return 2 * u\n"
+												+ "}\n");
+		b.interpret(tree);
+		tree = useFunctionCall("func3(7)");
+		assertEquals(14, b.evaluate(tree), 0);
+		assertEquals(1, b.scopes.size());
+		
+		tree = useFunction("define func4 using v {\n"
+												+ "x = func3(13) + v\n"
+												+ "}\n");
+		b.interpret(tree);
+		tree = useFunctionCall("func4(0.2)");
+		b.evaluate(tree);
+		assertEquals(26.2, b.fetch("x"), 0);
+		assertEquals(1, b.scopes.size());
+		
+		tree = useFunction("define func5 using u {\n"
+												+ "return u * func3(5)\n"
+												+ "}\n");
+		b.interpret(tree);
+		tree = useFunctionCall("func5(3)");
+		assertEquals(30, b.evaluate(tree), 0);
+		assertEquals(1, b.scopes.size());
+		
+		tree = useFunction("define func6 using u {\n"
+												+ "x = 100\n"
+												+ "return u\n"
+												+ "x = 200\n"
+												+ "}\n");
+		b.interpret(tree);
+		tree = useFunctionCall("func6(3)");
+		b.evaluate(tree);
+		assertEquals(100, b.fetch("x"), 0);
+		assertEquals(1, b.scopes.size());
+		
+		tree = useFunction("define func7 using u {\n"
+												+ "x = 100\n"
+												+ "}\n");
+		b.interpret(tree);
+		tree = useFunctionCall("func7(3)");
+		assertEquals(0, b.evaluate(tree), 0);
+		assertEquals(1, b.scopes.size());
+		
+		tree = useFunction("define func8 using u {\n"
+												+ "switch{\n"
+													+ "case u = 1\n"
+														+ "return u\n"
+													+ "case u > 1\n"
+														+ "return 1 + func8(u - 1)\n"
+													+ "}\n"
+												+ "}\n");
+		b.interpret(tree);
+		tree = useFunctionCall("func8(400)");
+		assertEquals(400, b.evaluate(tree), 0);
+		assertEquals(1, b.scopes.size());
+		
+		tree = useFunction("define func9 using u {\n"
+												+ "x = 10\n"
+												+ "}\n");
+		b.interpret(tree);
+		tree = useCommand("do func9(400)\n");
+		b.interpret(tree);
+		assertEquals(10, b.fetch("x"), 0);
+		assertEquals(1, b.scopes.size());
+	}
 	
-//	@Test
-//	public void testInterpretProgram() {
-//		Tree<Token> tree;
-//		Bug b = new Bug();
-//		fail("Not yet implemented");
-//	}
-
-//	@Test
-//	public void testInterpretAllbugs() {
-//		Tree<Token> tree;
-//		Bug b = new Bug();
-//		fail("Not yet implemented");
-//	}
-
+	@Test
+	public void testDoStatement() {
+		Tree<Token> tree;
+		Interpreter i = new Interpreter();
+		Bug b = new Bug(i);
+		
+		tree = useFunction("define func9 using u {\n"
+												+ "x = 10\n"
+												+ "}\n");
+		b.interpret(tree);
+		tree = useCommand("do func9(400)\n");
+		b.interpret(tree);
+		assertEquals(10, b.fetch("x"), 0);
+		assertEquals(1, b.scopes.size());
+	}
+	
 	@Test
 	public void testInterpretBug() {
 		Tree<Token> tree;
-		Bug b1 = new Bug();
+		Interpreter i = new Interpreter();
+		Bug b1 = new Bug(i);
 		
 		assertEquals(0, b1.fetch("x"), 0);
 		assertEquals(0, b1.fetch("y"), 0);
@@ -127,7 +307,7 @@ public class BugTest {
 		assertEquals(52, b1.fetch("y"), 0);
 		assertEquals(90, b1.fetch("angle"), 0);
 		
-		Bug b2 = new Bug();
+		Bug b2 = new Bug(i);
 		assertEquals(0, b2.fetch("x"), 0);
 		assertEquals(0, b2.fetch("y"), 0);
 		assertEquals(0, b2.fetch("angle"), 0);
@@ -147,7 +327,7 @@ public class BugTest {
 		assertEquals(90, b2.fetch("angle"), 0);
 		assertEquals(25, b2.fetch("foo"), 0);
 		
-		Bug b3 = new Bug();
+		Bug b3 = new Bug(i);
 		assertEquals(0, b3.fetch("x"), 0);
 		assertEquals(0, b3.fetch("y"), 0);
 		assertEquals(0, b3.fetch("angle"), 0);
@@ -168,12 +348,35 @@ public class BugTest {
 		assertEquals(90, b3.fetch("angle"), 0);
 		assertEquals(25, b3.fetch("foo"), 0);
 		assertEquals(0, b3.fetch("bar"), 0);
+		
+		Bug b4 = new Bug(i);
+		assertEquals(0, b4.fetch("x"), 0);
+		assertEquals(0, b4.fetch("y"), 0);
+		assertEquals(0, b4.fetch("angle"), 0);
+		tree = useBugDefinition("Bug bugD {\n"
+										+ "var foo\n"
+										+ "initially {\n"
+													+ "x = 50\n"
+													+ "y = 50\n"
+													+ "foo = 30\n"
+										+ "}\n"
+										+ "moveto func1(foo), func1(x)\n"
+										+ "define func1 using z {\n"
+																+ "return 2 * z\n"
+															+ "}\n"
+								+ "}\n");
+		b4.interpret(tree);
+		assertEquals(60, b4.fetch("x"), 0);
+		assertEquals(100, b4.fetch("y"), 0);
+		assertEquals(0, b4.fetch("angle"), 0);
+		assertEquals(30, b4.fetch("foo"), 0);
 	}
 
 	@Test
 	public void testInterpretVar() {
 		Tree<Token> tree;
-		Bug b = new Bug();
+		Interpreter i = new Interpreter();
+		Bug b = new Bug(i);
 		
 		try {
 			b.fetch("foo");
@@ -200,7 +403,8 @@ public class BugTest {
 	@Test
 	public void testInterpretInitially() {
 		Tree<Token> tree;
-		Bug b = new Bug();
+		Interpreter i = new Interpreter();
+		Bug b = new Bug(i);
 		
 		assertEquals(0, b.fetch("x"), 0);
 		assertEquals(0, b.fetch("y"), 0);
@@ -233,7 +437,8 @@ public class BugTest {
 	@Test
 	public void testInterpretBlock() {
 		Tree<Token> tree;
-		Bug b = new Bug();
+		Interpreter i = new Interpreter();
+		Bug b = new Bug(i);
 		
 		assertEquals(0, b.fetch("x"), 0);
 		assertEquals(0, b.fetch("y"), 0);
@@ -266,7 +471,8 @@ public class BugTest {
 	@Test
 	public void testInterpretMove() {
 		Tree<Token> tree;
-		Bug b = new Bug();
+		Interpreter i = new Interpreter();
+		Bug b = new Bug(i);
 		
 		assertEquals(0, b.fetch("x"), 0);
 		assertEquals(0, b.fetch("y"), 0);
@@ -293,7 +499,8 @@ public class BugTest {
 	@Test
 	public void testInterpretMoveto() {
 		Tree<Token> tree;
-		Bug b = new Bug();
+		Interpreter i = new Interpreter();
+		Bug b = new Bug(i);
 		
 		assertEquals(0, b.fetch("x"), 0);
 		assertEquals(0, b.fetch("y"), 0);
@@ -311,7 +518,8 @@ public class BugTest {
 	@Test
 	public void testInterpretTurn() {
 		Tree<Token> tree;
-		Bug b = new Bug();
+		Interpreter i = new Interpreter();
+		Bug b = new Bug(i);
 		
 		assertEquals(0, b.fetch("angle"), 0);
 		tree = useCommand("turn 90\n");
@@ -330,7 +538,8 @@ public class BugTest {
 	@Test
 	public void testInterpretTurnto() {
 		Tree<Token> tree;
-		Bug b = new Bug();
+		Interpreter i = new Interpreter();
+		Bug b = new Bug(i);
 		
 		assertEquals(0, b.fetch("angle"), 0);
 		tree = useCommand("turnto 90\n");
@@ -367,7 +576,8 @@ public class BugTest {
 	@Test
 	public void testInterpretAssign() {
 		Tree<Token> tree;
-		Bug b = new Bug();
+		Interpreter i = new Interpreter();
+		Bug b = new Bug(i);
 		
 		assertEquals(0, b.fetch("x"), 0);
 		tree = useCommand("x = 7\n");
@@ -379,7 +589,10 @@ public class BugTest {
 			b.interpret(tree);
 			fail();
 		} catch (IllegalArgumentException e) { }
-		b.store("foo", 0);
+		
+		tree = useVarDeclaration("var x, foo\n");
+		b.interpret(tree);
+		tree = useCommand("foo = 10\n");
 		b.interpret(tree);
 		assertEquals(10, b.fetch("foo"), 0);
 		
@@ -391,7 +604,8 @@ public class BugTest {
 	@Test
 	public void testInterpretLoop() {
 		Tree<Token> tree;
-		Bug b = new Bug();
+		Interpreter i = new Interpreter();
+		Bug b = new Bug(i);
 		
 		assertEquals(0, b.fetch("x"), 0);
 		assertEquals(0, b.fetch("y"), 0);
@@ -443,7 +657,8 @@ public class BugTest {
 	@Test
 	public void testInterpretSwitch() {
 		Tree<Token> tree;
-		Bug b = new Bug();
+		Interpreter i = new Interpreter();
+		Bug b = new Bug(i);
 		
 		assertEquals(0, b.fetch("x"), 0);
 		assertEquals(0, b.fetch("y"), 0);
@@ -478,7 +693,8 @@ public class BugTest {
 	@Test
 	public void testInterpretColor() {
 		Tree<Token> tree;
-		Bug b = new Bug();
+		Interpreter i = new Interpreter();
+		Bug b = new Bug(i);
 		
 		assertNull(b.bugColor);
 		tree = useCommand("color blue\n");
@@ -543,6 +759,24 @@ public class BugTest {
 			return p.stack.pop();
 		} else {
 			throw new IllegalArgumentException("Input is not a valid bug definition");
+		}
+	}
+	
+	private Tree<Token> useFunction(String func) {
+		Parser p = new Parser(func);
+		if (p.isFunctionDefinition()) {
+			return p.stack.pop();
+		} else {
+			throw new IllegalArgumentException("Input is not a valid function definition");			
+		}
+	}
+	
+	private Tree<Token> useFunctionCall(String call) {
+		Parser p = new Parser(call);
+		if (p.isFunctionCall()) {
+			return p.stack.pop();
+		} else {
+			throw new IllegalArgumentException("Input is not a valid function call");			
 		}
 	}
 }

@@ -1173,6 +1173,32 @@ public class ParserTest {
 	}
 
 	@Test
+	public void testIsProgramWithComments() {
+		Tree<Token> expected;
+		
+		use("// Some comment at beginning\n"
+				+ "Bug bug1 { \n" + 
+			"move x\n" + 
+			"}\n\n");
+		assertTrue(parser.isProgram());
+		expected = tree("program",
+						tree("Allbugs", "list", "list"),
+						tree("list", tree("Bug", "bug1", "list", tree("initially", "block"), tree("block", tree("move", "x")), "list")));
+		assertStackTopEquals(expected);
+		
+		use("// Some comment\n"
+		+ "// Some other comment at beginning\n"
+				+ "Bug bug1 { \n" + 
+			"move x\n" + 
+			"}\n\n");
+		assertTrue(parser.isProgram());
+		expected = tree("program",
+						tree("Allbugs", "list", "list"),
+						tree("list", tree("Bug", "bug1", "list", tree("initially", "block"), tree("block", tree("move", "x")), "list")));
+		assertStackTopEquals(expected);
+	}
+	
+	@Test
 	public void testIsProgram() {
 		Tree<Token> expected;
 		
@@ -1181,7 +1207,7 @@ public class ParserTest {
 			"}\n\n");
 		assertTrue(parser.isProgram());
 		expected = tree("program",
-						"Allbugs",
+						tree("Allbugs", "list", "list"),
 						tree("list", tree("Bug", "bug1", "list", tree("initially", "block"), tree("block", tree("move", "x")), "list")));
 		assertStackTopEquals(expected);
 		

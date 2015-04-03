@@ -689,10 +689,16 @@ public class Parser {
     public boolean isProgram() {
     	pushNewNode("program");
     	
+    	isEol();
+    	
     	if (isAllbugsCode()) {
     		makeTree(2, 1);
     	} else {
     		pushNewNode("Allbugs");
+    		pushNewNode("list");
+    		makeTree(2, 1);
+    		pushNewNode("list");
+    		makeTree(2, 1);
     		makeTree(2, 1);
     	}
     	
