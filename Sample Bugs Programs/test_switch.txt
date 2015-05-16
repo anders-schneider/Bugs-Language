@@ -1,0 +1,33 @@
+// Draws in blue and green, but not red
+Bug TestSwitch {
+    x = 50
+    y = 0
+    switch {
+        case x > y
+            color blue
+        case x < y
+            color red
+    }
+    moveto 100, 50
+    switch {
+        case x > y
+            color blue
+        case x <= y
+            color green
+    }
+    moveto 50, 100
+    switch {
+        case x > y
+            color blue
+        case x <= y
+            color green
+    }
+    moveto 0, 50
+    switch {
+        case x > y
+            color blue
+        case x <= y
+            color green
+    }
+    moveto 50, 0
+}

@@ -1,0 +1,12 @@
+Bug SingleLoop {
+    var count
+    x = 40
+    y = 25
+    color blue
+    loop {
+        count = count + 1
+        move 20
+        turn -45
+        exit if count >= 8
+    }
+}

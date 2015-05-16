@@ -1,0 +1,34 @@
+Allbugs {
+    var amount, delta
+}
+Bug Sally {   
+    initially {
+        color red
+        x = 50
+        y = 50
+        amount = 1
+        angle = 0
+    }
+    loop {
+        move amount
+        amount = amount + delta
+        turn 90
+        exit if x < 0
+        exit if x > 100
+    }
+}
+Bug Fred {
+    initially {
+    color blue
+        x = 50
+        y = 49
+        delta = 1
+        angle = 180
+    }
+    loop {
+        move amount
+        turn 90
+        exit if x < 0
+        exit if x > 100
+    }
+}

@@ -1,0 +1,9 @@
+Bug Diamond {
+    x = 50
+    y = 0
+    color black
+    moveto 100, 50
+    moveto 50, 100
+    moveto 0, 50
+    moveto 50, 0
+}

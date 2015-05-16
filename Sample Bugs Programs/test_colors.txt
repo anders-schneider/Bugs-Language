@@ -1,0 +1,50 @@
+Bug TestColors {
+    y = 0
+    line 1, 0, 1, 100
+    
+    color black
+    y = y + 7
+    line 0, y, 100, y
+    color blue
+    y = y + 7
+    line 0, y, 100, y
+    color cyan
+    y = y + 7
+    line 0, y, 100, y
+    color darkGray
+    y = y + 7
+    line 0, y, 100, y
+    color gray
+    y = y + 7
+    line 0, y, 100, y
+    color green
+    y = y + 7
+    line 0, y, 100, y
+    color lightGray
+    y = y + 7
+    line 0, y, 100, y
+    color magenta
+    y = y + 7
+    line 0, y, 100, y
+    color orange
+    y = y + 7
+    line 0, y, 100, y
+    color pink
+    y = y + 7
+    line 0, y, 100, y
+    color red
+    y = y + 7
+    line 0, y, 100, y
+    color white
+    y = y + 7
+    line 0, y, 100, y
+    color yellow
+    y = y + 7
+    line 0, y, 100, y
+    color none
+    y = y + 7
+    line 0, y, 100, y
+    
+    color black
+    line 99, 0, 99, 100
+}

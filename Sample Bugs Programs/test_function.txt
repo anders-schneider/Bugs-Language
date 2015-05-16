@@ -1,0 +1,26 @@
+Bug TestFunction {
+    var size
+    size = 20
+    x= 0
+    y = 0
+    color blue
+    do drawSquare(size)
+    x = 40
+    y = 40
+    size = drawSquare(size)
+    x = 30
+    y = 30
+    size = drawSquare(size)
+    
+    define drawSquare using size {
+         move size
+         turn -90
+         move size
+         turn -90
+         move size
+         turn -90
+         move size
+         turn -90
+         return size + 20
+    }
+}

@@ -1,0 +1,25 @@
+Bug DoubleLoop {
+    var count, moveAmount
+    var loopCount
+    x = 40
+    y = 25
+    moveAmount = 20
+    color blue
+    loop {
+        count = 0
+        color blue
+        loop {
+            count = count + 1
+            move moveAmount
+            turn -45
+            exit if count >= 8
+        }
+         loopCount = loopCount + 1
+         exit if loopCount = 3
+         turn -60
+         color green
+         move 5
+         turn 60
+         moveAmount = moveAmount - 5
+     }
+}
